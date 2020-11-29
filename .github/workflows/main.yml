@@ -49,6 +49,19 @@ jobs:
         run: |
           npm run build -- --prod
 
+      # Login to Docker
+      - name: Login docker.pkg.github.com
+        run: |
+          touch ~/TOKEN.txt
+          echo "${{secrets.PUBLISH_PACKAGE}}" > ~/TOKEN.txt
+          cat ~/TOKEN.txt | docker login https://docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      # Build and Post Image
+      - name: Build and Post image
+        run: |
+          docker build  -t docker.pkg.github.com/lishuoz/angular-aws-app/angularawsapp:latest .
+          docker push docker.pkg.github.com/lishuoz/angular-aws-app/angularawsapp:latest
+
       # Deploy to S3
       # This is a third party action used to sync our production build app with the AWS S3 bucket
       # For security purpose I am using secrets configured in project repo setting.
